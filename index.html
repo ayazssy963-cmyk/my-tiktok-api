@@ -3,65 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Downloader - PureTik</title>
+    <title>محمل تيك توك السريع</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; text-align: center; padding: 20px; }
-        .card { background: #1e1e1e; padding: 30px 15px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #fe2c55; }
-        input { width: 90%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid #333; background: #2b2b2b; color: white; text-align: center; }
-        button { background: #fe2c55; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; width: 95%; cursor: pointer; }
-        button:disabled { background: #555; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; text-align: center; padding: 20px; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .card { background: #1e1e1e; padding: 30px 20px; border-radius: 20px; max-width: 400px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        h2 { color: #fe2c55; margin-bottom: 10px; }
+        p { color: #888; font-size: 0.9rem; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: 1px solid #333; background: #2b2b2b; color: white; text-align: center; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #fe2c55; }
+        button { background: #fe2c55; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #444; cursor: not-allowed; }
+        #loader { display: none; margin-top: 15px; color: #fe2c55; font-weight: bold; }
         #result { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; }
-        .dl-link { background: #25d366; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block; margin-top: 10px; }
-        #loader { display: none; color: #fe2c55; margin-top: 10px; }
+        .dl-link { background: #25d366; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; display: inline-block; margin-top: 10px; font-weight: bold; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>محمل تيك توك</h2>
-        <p style="font-size: 0.8rem; color: #888;">أدخل رابط الفيديو للاستخراج</p>
+        <h2>PureTik</h2>
+        <p>تحميل فيديوهات تيك توك بدون علامة مائية</p>
+        
         <input type="text" id="videoUrl" placeholder="الصق رابط الفيديو هنا">
         <button id="extractBtn" onclick="startDownload()">استخراج الفيديو</button>
         
-        <div id="loader">جاري الاستخراج من السيرفر...</div>
+        <div id="loader">جاري التحليل... انتظر قليلاً</div>
 
         <div id="result">
-            <p>✅ الفيديو جاهز للتحميل!</p>
-            <a id="downloadBtn" class="dl-link" href="#" target="_blank">تحميل بدون علامة مائية</a>
+            <p style="color: #25d366;">✅ الفيديو جاهز!</p>
+            <a id="downloadBtn" class="dl-link" href="#" target="_blank">تحميل الفيديو الآن</a>
         </div>
     </div>
 
     <script>
     async function startDownload() {
         const urlInput = document.getElementById('videoUrl');
+        const url = urlInput.value.trim();
         const btn = document.getElementById('extractBtn');
         const loader = document.getElementById('loader');
         const resultDiv = document.getElementById('result');
         const dlBtn = document.getElementById('downloadBtn');
 
-        if(!urlInput.value) return alert("يرجى لصق الرابط أولاً");
+        if(!url) return alert("يرجى لصق الرابط أولاً");
 
-        // تفعيل وضع التحميل
+        // تفعيل وضع التحميل وإخفاء النتائج السابقة
         btn.disabled = true;
         loader.style.display = 'block';
         resultDiv.style.display = 'none';
 
         try {
-            // ملاحظة: قمنا بتغيير الرابط ليكون متوافقاً مع أغلب سيرفرات تيك توك API
-            const response = await fetch(`https://my-tiktok-api-02qt.onrender.com/api/tiktok?url=${encodeURIComponent(urlInput.value)}`);
+            // استخدام API جاهزة مباشرة (Tiklydown) لضمان السرعة والعمل المستمر
+            const response = await fetch(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`);
             const data = await response.json();
             
-            if(data.status === "success" || (data.code === 0 && data.data.play)) {
-                // جلب رابط الفيديو (قد يختلف المسار حسب برمجة السيرفر لديك)
-                const videoLink = data.data.play || data.url;
-                dlBtn.href = videoLink;
+            // التحقق من وصول البيانات بنجاح
+            if(data && data.result && data.result.video && data.result.video.noWatermark) {
+                dlBtn.href = data.result.video.noWatermark;
                 resultDiv.style.display = 'block';
             } else {
-                alert("السيرفر لم يجد الفيديو، تأكد من أن الحساب ليس خاصاً");
+                alert("فشل الاستخراج. تأكد من أن الرابط لفيديو عام وليس خاصاً.");
             }
         } catch (e) {
             console.error(e);
-            alert("فشل الاتصال بالسيرفر. تأكد أن سيرفر Render مستيقظ.");
+            alert("حدث خطأ في الاتصال بالخدمة. حاول مرة أخرى.");
         } finally {
             btn.disabled = false;
             loader.style.display = 'none';
